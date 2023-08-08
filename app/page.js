@@ -1,7 +1,10 @@
+import TileBoard from "@/components/TileBoard"
 export default async function Home() {
   return (
     <div>
-      <h1>Hello, World</h1>
+      <h1 style={{textAlign: "center",}}>The Tile Game</h1>
+      <hr/>
+      <TileBoard/>
     </div>
   )
 }
