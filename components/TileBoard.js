@@ -11,24 +11,33 @@ const TileBoard = () => {
                 }
             }
         }
-        return [-1, -1];
+        return [-1, -1]; // if this line gets hit, we got some serious issues
     }
     const isValidMove = (state, move) => {
+        const [x, y] = findOpenPosition(state);
         switch (move) {
             case "ArrowLeft":
-                const [x, y] = findOpenPosition(state);
                 if (y >= 0 && y < state[0].length - 1) {
                     return true;
                 }
                 return false;
             case "ArrowRight":
-                break;
-            case "ArrowUp":
-                break;
-            case "ArrowDown":
-                break;
-            default:
+                if (y > 0 && y < state[0].length) {
+                    return true;
+                }
                 return false;
+            case "ArrowUp":
+                if (x >= 0 && x < state.length - 1) {
+                    return true;
+                }
+                return false;
+            case "ArrowDown":
+                if (x > 0 && x < state.length) {
+                    return true;
+                }
+                return false;
+            default:
+                return false; // if this line gets hit, we got some serious issues
         }
     }    
     const handleKeyPress = (e) => {
