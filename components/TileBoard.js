@@ -58,7 +58,7 @@ const TileBoard = () => {
                 return false; // if this line gets hit, we got some serious issues
         }
     }
-    const performMove = (state, move) => {
+    const performMove = (state, move, updateGUI=true) => {
         const [xOpen, yOpen] = findOpenPosition(board);
         let newBoard = [];
         state.forEach(row => newBoard.push([...row]));
@@ -67,30 +67,87 @@ const TileBoard = () => {
                 let rightOfOpenPosition = newBoard[xOpen][yOpen + 1];
                 newBoard[xOpen][yOpen + 1] = newBoard[xOpen][yOpen];
                 newBoard[xOpen][yOpen] = rightOfOpenPosition;
-                setBoard(newBoard);
+                if (updateGUI) {
+                    setBoard(newBoard);
+                }
+                else {
+                    return newBoard;
+                }
                 break;
             case "ArrowRight":
                 let leftOfOpenPosition = newBoard[xOpen][yOpen - 1];
                 newBoard[xOpen][yOpen - 1] = newBoard[xOpen][yOpen];
                 newBoard[xOpen][yOpen] = leftOfOpenPosition;
-                setBoard(newBoard);
+                if (updateGUI) {
+                    setBoard(newBoard);
+                }
+                else {
+                    return newBoard;
+                }
                 break;
             case "ArrowUp":
                 let belowOpenPosition = newBoard[xOpen + 1][yOpen];
                 newBoard[xOpen + 1][yOpen] = newBoard[xOpen][yOpen];
                 newBoard[xOpen][yOpen] = belowOpenPosition;
-                setBoard(newBoard);
+                if (updateGUI) {
+                    setBoard(newBoard);
+                }
+                else {
+                    return newBoard;
+                }
                 break;
             case "ArrowDown":
                 let aboveOpenPosition = newBoard[xOpen - 1][yOpen];
                 newBoard[xOpen - 1][yOpen] = newBoard[xOpen][yOpen];
                 newBoard[xOpen][yOpen] = aboveOpenPosition;
-                setBoard(newBoard);
+                if (updateGUI) {
+                    setBoard(newBoard);
+                }
+                else {
+                    return newBoard;
+                }
                 break;
             default:
                 alert("Something went wrong!"); // if this line gets hit, we got some serious issues
         }
-    }    
+    }
+
+    const compareBoards = (state1, state2) => {
+        let rows1 = state1.length;
+        let rows2 = state2.length;
+        let cols1 = state1[0].length;
+        let cols2 = state2[0].length;
+        if (rows1 !== rows2 || cols1 !== cols2) {
+            return false;
+        }
+        for (let i = 0; i < rows1; i++) {
+            for (let j = 0; j < cols1; j++) {
+                if (state1[i][j] !== state2[i][j]) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    
+    const solveWithBFS = async (state) => {
+        let queue = [[state]];
+        let visited = new Set();
+        visited.add(state);
+        queue.push(state);
+        while (queue.length !== 0) {
+            let path = queue.shift();
+            let lastNode = path.at(-1);
+            if (isGoalState(lastNode)) {
+                return path;
+            }
+            if (!contains(lastNode, visited)) {
+                ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].forEach(move => {
+                    // TODO: finish implementing this BFS and implement contains function
+                });
+            }
+        }
+    }
 
     const [board, setBoard] = useState([
         [1, 2, 3, 4],
