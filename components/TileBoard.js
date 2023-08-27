@@ -64,36 +64,27 @@ const TileBoard = () => {
         state.forEach(row => newBoard.push([...row]));
         switch (move) {
             case "ArrowLeft":
-                let firstElementOfRow = newBoard[xOpen][0];
-                for (let i =  0; i < newBoard[xOpen].length; i++) {   
-                    newBoard[xOpen][i] = newBoard[xOpen][i + 1];
-                }
-                newBoard[xOpen][newBoard[xOpen].length - 1] = firstElementOfRow;
+                let rightOfOpenPosition = newBoard[xOpen][yOpen + 1];
+                newBoard[xOpen][yOpen + 1] = newBoard[xOpen][yOpen];
+                newBoard[xOpen][yOpen] = rightOfOpenPosition;
                 setBoard(newBoard);
                 break;
             case "ArrowRight":
-                let lastElementOfRow = newBoard[xOpen][newBoard[xOpen].length - 1];
-                for (let i = newBoard[xOpen].length - 1; i > 0; i--) {   
-                    // console.log("loking at index", i, "and elements", newBoard[xOpen][i], newBoard[xOpen][i-1]);
-                    newBoard[xOpen][i] = newBoard[xOpen][i - 1];
-                }
-                newBoard[xOpen][0] = lastElementOfRow;
+                let leftOfOpenPosition = newBoard[xOpen][yOpen - 1];
+                newBoard[xOpen][yOpen - 1] = newBoard[xOpen][yOpen];
+                newBoard[xOpen][yOpen] = leftOfOpenPosition;
                 setBoard(newBoard);
                 break;
             case "ArrowUp":
-                let firstElementOfColumn = newBoard[0][yOpen];
-                for (let i = 0; i < newBoard.length - 1; i++) {
-                    newBoard[i][yOpen] = newBoard[i + 1][yOpen];
-                }
-                newBoard[newBoard.length - 1][yOpen] = firstElementOfColumn;
+                let belowOpenPosition = newBoard[xOpen + 1][yOpen];
+                newBoard[xOpen + 1][yOpen] = newBoard[xOpen][yOpen];
+                newBoard[xOpen][yOpen] = belowOpenPosition;
                 setBoard(newBoard);
                 break;
             case "ArrowDown":
-                let lastElementOfColumn = newBoard[newBoard.length - 1][yOpen];
-                for (let i = newBoard.length - 1; i > 0; i--) {
-                    newBoard[i][yOpen] = newBoard[i - 1][yOpen]; 
-                }
-                newBoard[0][yOpen] = lastElementOfColumn;
+                let aboveOpenPosition = newBoard[xOpen - 1][yOpen];
+                newBoard[xOpen - 1][yOpen] = newBoard[xOpen][yOpen];
+                newBoard[xOpen][yOpen] = aboveOpenPosition;
                 setBoard(newBoard);
                 break;
             default:
