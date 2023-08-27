@@ -1,5 +1,8 @@
 export const metadata = {
-  title: 'Tile Game',
+  title: "Tile Game",
+  icons: {
+    icon: "/favicon.ico"
+  }
 }
 
 export default function RootLayout({ children }) {
