@@ -129,23 +129,38 @@ const TileBoard = () => {
         }
         return true;
     }
+
+    const boardContained = (needle, haystack) => {
+        haystack.forEach(bale => {
+            if (compareBoards(needle, bale)) {
+                return true;
+            }
+        });
+        return false;
+    }
     
-    const solveWithBFS = async (state) => {
+    const solveWithBFS = (state) => {
         let queue = [[state]];
         let visited = new Set();
         visited.add(state);
-        queue.push(state);
         while (queue.length !== 0) {
             let path = queue.shift();
             let lastNode = path.at(-1);
             if (isGoalState(lastNode)) {
                 return path;
             }
-            if (!contains(lastNode, visited)) {
-                ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].forEach(move => {
-                    // TODO: finish implementing this BFS and implement contains function
-                });
-            }
+            ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].forEach(move => {
+                let newPath = [path];
+                if (isValidMove(lastNode, move)) {
+                    let newNode = performMove(lastNode, move, false);
+                    if (!boardContained(newNode, visited)) {
+                        newPath.push(performMove(lastNode, move, false));
+                        queue.push(newPath);
+                        visited.add(newNode);
+                    }
+                }
+                
+            });
         }
     }
 
@@ -183,7 +198,7 @@ const TileBoard = () => {
                     </div>
                 )
             })}
-            <button style={{display: "flex", justifyContent: "center", marginLeft: "22px", marginTop: "25px",}}>Get Solution</button>
+            <button style={{display: "flex", justifyContent: "center", marginLeft: "22px", marginTop: "25px",}} onClick={() => {console.log(solveWithBFS(board));}}>Get Solution</button>
         </div>
     )
 };
