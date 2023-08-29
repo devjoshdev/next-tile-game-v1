@@ -59,7 +59,7 @@ const TileBoard = () => {
         }
     }
     const performMove = (state, move, updateGUI=true) => {
-        const [xOpen, yOpen] = findOpenPosition(board);
+        const [xOpen, yOpen] = findOpenPosition(state);
         let newBoard = [];
         state.forEach(row => newBoard.push([...row]));
         switch (move) {
@@ -138,30 +138,9 @@ const TileBoard = () => {
         });
         return false;
     }
-    
+
     const solveWithBFS = (state) => {
-        let queue = [[state]];
-        let visited = new Set();
-        visited.add(state);
-        while (queue.length !== 0) {
-            let path = queue.shift();
-            let lastNode = path.at(-1);
-            if (isGoalState(lastNode)) {
-                return path;
-            }
-            ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].forEach(move => {
-                let newPath = [path];
-                if (isValidMove(lastNode, move)) {
-                    let newNode = performMove(lastNode, move, false);
-                    if (!boardContained(newNode, visited)) {
-                        newPath.push(performMove(lastNode, move, false));
-                        queue.push(newPath);
-                        visited.add(newNode);
-                    }
-                }
-                
-            });
-        }
+
     }
 
     const [board, setBoard] = useState([
