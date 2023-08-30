@@ -3,10 +3,10 @@ import Tile from "./Tile";
 import { useEffect, useState } from "react";
 
 const TileBoard = () => {
-    const isGoalState = (state) => {
+    const isGoalState = (state) => {  
         const numRows = state.length;
         const numCols = state[0].length;
-        const elements = numRows * numCols - 1 // last element should be open (-1)
+        const elements = numRows * numCols
         let counter = 1;
         for (let i = 0; i < numRows; i++) {
             for (let j = 0; j < numCols; j++) {
@@ -140,7 +140,36 @@ const TileBoard = () => {
     }
 
     const solveWithBFS = (state) => {
-
+        // TODO: make a Node class, it should have state, move and an equals(o) implementation and refactor this to use it 
+        let queue = [];
+        let explored = new Set();
+        let parent = new Map();
+        queue.push([state, ""]);
+        explored.add(state);
+        while (queue.length !== 0) {
+            let [node, currentMove] = queue.shift();
+            console.log("looking at node--------------------------------");
+            console.log(node);
+            console.log("--------------------------------");
+            if (isGoalState(node)) {
+                return [node, parent];
+            }
+            ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].forEach(move => {
+                if (isValidMove(node, move)) {
+                    console.log("performing move", move);
+                    let neighbor = performMove(node, move, false);
+                    if (!boardContained(neighbor, Array.from(explored.values()))) {
+                       explored.add(neighbor);
+                       parent.set([neighbor, move], [node, currentMove]);
+                       queue.push([neighbor, move]); 
+                    }
+                    else {
+                        console.log("contained");
+                    }
+                }
+            })
+        }
+        console.log("hit the end!");
     }
 
     const [board, setBoard] = useState([
@@ -160,8 +189,8 @@ const TileBoard = () => {
         window.addEventListener("keydown", handleKeyPress); 
         return () => window.removeEventListener("keydown", handleKeyPress)
     }, [board]);
-    console.log("board", board);
-    console.log("is goal state?", isGoalState(board));
+    // console.log("board", board);
+    // console.log("is goal state?", isGoalState(board));
     return (
         <div style={{paddingLeft: "45%", paddingRight: "45%",}}>
             {board.map((row, rowIdx) => {
