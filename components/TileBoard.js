@@ -138,9 +138,31 @@ const TileBoard = () => {
         });
         return false;
     }
-
+    const reconstructPath = (node, currentMove, map) => {
+        let solutionPath = [currentMove];
+        let children = Array.from(map.keys());
+        let parents = Array.from(map.values()); 
+        while (currentMove !== "") {
+            children.every(([state, move], idx) => {
+                // console.log(state);
+                console.log(move);
+                // console.log(idx);
+                if (compareBoards(state, node)) {
+                    node = parents[idx][0];
+                    solutionPath.push(parents[idx][1]);
+                    currentMove = parents[idx][1];
+                    console.log("current path", solutionPath);
+                    return false;
+                }
+                else {
+                    return true;
+                }
+            });
+            // return;
+        }
+        return solutionPath.reverse();
+    }
     const solveWithBFS = (state) => {
-        // TODO: make a Node class, it should have state, move and an equals(o) implementation and refactor this to use it 
         let queue = [];
         let explored = new Set();
         let parent = new Map();
@@ -152,7 +174,7 @@ const TileBoard = () => {
             console.log(node);
             console.log("--------------------------------");
             if (isGoalState(node)) {
-                return [node, parent];
+                return reconstructPath(node, currentMove, parent);
             }
             ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].forEach(move => {
                 if (isValidMove(node, move)) {
