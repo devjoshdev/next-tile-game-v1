@@ -193,12 +193,85 @@ const TileBoard = () => {
         }
         console.log("hit the end!");
     }
+    const findValueFromMap = (elem, map) => {
+        let keys = Array.from(map.keys());
+        let vals = Array.from(map.values());
+        for (let i = 0; i < keys.length; i++) {
+            if (compareBoards(keys[i], elem)) {
+                return vals[i];
+            }
+        }
+        return Infinity;
+    }
+    const findElement = (state, num) => {
+        for (let i = 0; i < state.length; i++) {
+            for (let j = 0; j < state[i].length; j++) {
+                if (state[i][j] === num) {
+                    return [i, j];
+                }
+            }
+        }
+        return [-1, -1];
+    }
+    const manhattanDistance = (state) => {
+        let currentNum = 1;
+        let mDistance = 0;
+        for (let i = 0; i < state.length; i++) {
+            for (let j = 0; j < state[i].length; j++) {
+                const [foundX, foundY] = findElement(state, currentNum);
+                mDistance += Math.abs(foundX - i);
+                mDistance += Math.abs(foundY - j);
+                currentNum === 15 ? currentNum = -1 : currentNum++;
+            }
+        }
+        return mDistance;
+    }
+    const solveWithAStar = (state) => {
+        let openSet = [];
+        openSet.push([state, "", manhattanDistance(state)]);
+        let cameFrom = new Map();
+        let gScore = new Map();
+        gScore.set(state, 0);
+        let fScore = new Map();
+        fScore.set(state, manhattanDistance(state));
+        while (openSet.length !== 0) {
+            let [currentNode, currentMove, currentFScore] = openSet.shift();
+            if (isGoalState(currentNode)) {
+                return reconstructPath(currentNode, currentMove, cameFrom);
+            }
+            ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].forEach(move => {
+                if (isValidMove(currentNode, move)) {
+                    let neighbor = performMove(currentNode, move, false);
+                    let tentativeGScore = findValueFromMap(currentNode, gScore) + 1;
+                    if (tentativeGScore < findValueFromMap(neighbor, gScore)) {
+                        let newFScore = tentativeGScore + manhattanDistance(neighbor);
+                        cameFrom.set([neighbor, move], [currentNode, currentMove]);
+                        gScore.set(neighbor, tentativeGScore);
+                        fScore.set(neighbor, newFScore);
+                        if (!boardContained(neighbor, openSet.map(elem => elem[0]))) {
+                            let indexForInsert;
+                            for (indexForInsert = 0; indexForInsert < openSet.length; indexForInsert++) {
+                                let [openSetBoard, openSetMove, openSetFScore] = openSet[indexForInsert];
+                                if (newFScore < openSetFScore) {
+                                    break;
+                                }
+                            }
+                            openSet.splice(indexForInsert, 0, [neighbor, move, newFScore]);
+                        }
+                    }
+
+                }
+            });
+
+        }
+        console.log("Did not find solution");
+    }
 
     const [board, setBoard] = useState([
-        [1, 2, 3, 4],
-        [5, 6, 7, 8],
-        [9, 10, 11, 12],
-        [13, 14, 15, -1],
+        [1, 6, 2, 4],
+        [10, 3, 8, -1],
+        [5, 9, 7, 12],
+        [13, 14, 11, 15],
     ]);
     useEffect(() => {
         const handleKeyPress = (e) => {
@@ -229,6 +302,7 @@ const TileBoard = () => {
                 )
             })}
             <button style={{display: "flex", justifyContent: "center", marginLeft: "22px", marginTop: "25px",}} onClick={() => {console.log(solveWithBFS(board));}}>Get Solution</button>
+            <button style={{display: "flex", justifyContent: "center", marginLeft: "14px",}} onClick={() => {console.log(solveWithAStar(board));}}>Get A* Solution</button>
         </div>
     )
 };
