@@ -2,7 +2,7 @@
 import Tile from "./Tile";
 import { useEffect, useState } from "react";
 
-const TileBoard = () => {
+const TileBoard = ({scramble}) => {
     const isGoalState = (state) => {  
         const numRows = state.length;
         const numCols = state[0].length;
@@ -68,7 +68,8 @@ const TileBoard = () => {
                 newBoard[xOpen][yOpen + 1] = newBoard[xOpen][yOpen];
                 newBoard[xOpen][yOpen] = rightOfOpenPosition;
                 if (updateGUI) {
-                    setBoard(newBoard);
+                    console.log("setting board with move", move);
+                    setBoard(oldBoard => newBoard);
                 }
                 else {
                     return newBoard;
@@ -79,7 +80,8 @@ const TileBoard = () => {
                 newBoard[xOpen][yOpen - 1] = newBoard[xOpen][yOpen];
                 newBoard[xOpen][yOpen] = leftOfOpenPosition;
                 if (updateGUI) {
-                    setBoard(newBoard);
+                    console.log("setting board with move", move);
+                    setBoard(oldBoard => newBoard);
                 }
                 else {
                     return newBoard;
@@ -90,7 +92,8 @@ const TileBoard = () => {
                 newBoard[xOpen + 1][yOpen] = newBoard[xOpen][yOpen];
                 newBoard[xOpen][yOpen] = belowOpenPosition;
                 if (updateGUI) {
-                    setBoard(newBoard);
+                    console.log("setting board with move", move);
+                    setBoard(oldBoard => newBoard);
                 }
                 else {
                     return newBoard;
@@ -101,7 +104,8 @@ const TileBoard = () => {
                 newBoard[xOpen - 1][yOpen] = newBoard[xOpen][yOpen];
                 newBoard[xOpen][yOpen] = aboveOpenPosition;
                 if (updateGUI) {
-                    setBoard(newBoard);
+                    console.log("setting board with move", move);
+                    setBoard(oldBoard => newBoard);
                 }
                 else {
                     return newBoard;
@@ -145,13 +149,13 @@ const TileBoard = () => {
         while (currentMove !== "") {
             children.every(([state, move], idx) => {
                 // console.log(state);
-                console.log(move);
+                // console.log(move);
                 // console.log(idx);
                 if (compareBoards(state, node)) {
                     node = parents[idx][0];
                     solutionPath.push(parents[idx][1]);
                     currentMove = parents[idx][1];
-                    console.log("current path", solutionPath);
+                    // console.log("current path", solutionPath);
                     return false;
                 }
                 else {
@@ -170,15 +174,15 @@ const TileBoard = () => {
         explored.add(state);
         while (queue.length !== 0) {
             let [node, currentMove] = queue.shift();
-            console.log("looking at node--------------------------------");
-            console.log(node);
-            console.log("--------------------------------");
+            // console.log("looking at node--------------------------------");
+            // console.log(node);
+            // console.log("--------------------------------");
             if (isGoalState(node)) {
                 return reconstructPath(node, currentMove, parent);
             }
             ["ArrowUp", "ArrowLeft", "ArrowDown", "ArrowRight"].forEach(move => {
                 if (isValidMove(node, move)) {
-                    console.log("performing move", move);
+                    // console.log("performing move", move);
                     let neighbor = performMove(node, move, false);
                     if (!boardContained(neighbor, Array.from(explored.values()))) {
                        explored.add(neighbor);
@@ -186,12 +190,12 @@ const TileBoard = () => {
                        queue.push([neighbor, move]); 
                     }
                     else {
-                        console.log("contained");
+                        // console.log("contained");
                     }
                 }
             })
         }
-        console.log("hit the end!");
+        // console.log("hit the end!");
     }
     const findValueFromMap = (elem, map) => {
         let keys = Array.from(map.keys());
@@ -264,15 +268,53 @@ const TileBoard = () => {
             });
 
         }
-        console.log("Did not find solution");
+        // console.log("Did not find solution");
     }
 
-    const [board, setBoard] = useState([
-        [1, 6, 2, 4],
-        [10, 3, 8, -1],
-        [5, 9, 7, 12],
-        [13, 14, 11, 15],
-    ]);
+    async function performSolution(method) {
+        let solutionMoves;
+        switch (method) {
+            case "bfs":
+                solutionMoves = solveWithBFS(board);
+                break;
+            case "astar":
+                solutionMoves = solveWithAStar(board);
+                break;
+        }
+        console.log("here is the solution", solutionMoves);
+        let newBoard = board;
+        for (let i = 1; i < solutionMoves.length; i++) {
+            console.log("making my way downtown", solutionMoves[i]);
+            newBoard = performMove(newBoard, solutionMoves[i], false);
+            setBoard(oldBoard => newBoard);
+            await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+    }
+
+    async function performSolutionHandler(method) {
+        await performSolution(method, board, setBoard);
+    }
+    const scrambleBoard = (state) => {
+        console.log("scrambling board");
+        let numMoves = 10;
+        let moves = ["ArrowUp", "ArrowDown", "ArrowRight", "ArrowLeft"];
+        let myBoard = state;
+        while (numMoves > 0) {
+            let possibleMove = moves[(Math.floor(Math.random() * moves.length))];
+            if (isValidMove(myBoard, possibleMove)) {
+                myBoard = performMove(myBoard, possibleMove, false);
+                numMoves--;
+            }
+        }
+        return myBoard;
+    };
+
+    const [board, setBoard] = useState([[1, 2, 3, 4],[5, 6, 7, 8],[9, 10, 11, 12],[13, 14, 15, -1]]);
+    useEffect(() => {
+        if (scramble) {
+            setBoard(scrambleBoard(board));
+        }
+    }, [])
     useEffect(() => {
         const handleKeyPress = (e) => {
             // console.log('yuhh', isValidMove(board, e.key));
@@ -284,7 +326,7 @@ const TileBoard = () => {
         window.addEventListener("keydown", handleKeyPress); 
         return () => window.removeEventListener("keydown", handleKeyPress)
     }, [board]);
-    // console.log("board", board);
+    console.log("board", board);
     // console.log("is goal state?", isGoalState(board));
     return (
         <div style={{paddingLeft: "45%", paddingRight: "45%",}}>
@@ -301,8 +343,8 @@ const TileBoard = () => {
                     </div>
                 )
             })}
-            <button style={{display: "flex", justifyContent: "center", marginLeft: "22px", marginTop: "25px",}} onClick={() => {console.log(solveWithBFS(board));}}>Get Solution</button>
-            <button style={{display: "flex", justifyContent: "center", marginLeft: "14px",}} onClick={() => {console.log(solveWithAStar(board));}}>Get A* Solution</button>
+            <button style={{display: "flex", justifyContent: "center", marginLeft: "8px", marginTop: "25px",}} onClick={() => {performSolutionHandler("bfs")}}>Get BFS Solution</button>
+            <button style={{display: "flex", justifyContent: "center", marginLeft: "14px",}} onClick={() => {performSolutionHandler("astar");}}>Get A* Solution</button>
         </div>
     )
 };

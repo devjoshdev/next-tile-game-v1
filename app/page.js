@@ -4,7 +4,7 @@ export default async function Home() {
     <div>
       <h1 style={{textAlign: "center",}}>The Tile Game</h1>
       <hr/>
-      <TileBoard/>
+      <TileBoard scramble={false}/>
     </div>
   )
 }
